@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -41,4 +40,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function get_visited_countries()
+    {
+        return $this->belongsToMany(Country::class, 'visited_countries', 'user_id', 'country_id')->withPivot("id");
+    }
+
+    public function get_countries_to_visit()
+    {
+        return $this->belongsToMany(Country::class, "countries_to_visit", 'user_id', 'country_id')->withPivot("id");
+    }
 }
