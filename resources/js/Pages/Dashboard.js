@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 import { Head } from "@inertiajs/inertia-react";
 import AsyncSelect from "react-select/async";
 
+import Datamap from "react-datamaps";
+
 export default function Dashboard(props) {
     const [visitedCountries, setVisitedCountries] = useState([]);
     const [countriesToVisit, setCountriesToVisit] = useState([]);
+
+    const [map, setMap] = useState({});
 
     const [visitedCountryValue, setVisitedCountryValue] = useState(null);
     const [countryToVisitValue, setCountryToVisitValue] = useState(null);
@@ -14,6 +18,20 @@ export default function Dashboard(props) {
         fetchVisitedCountries();
         fetchCountriesToVisit();
     }, []);
+
+    useEffect(() => {
+        const countriesMap = {};
+
+        visitedCountries.forEach((country) => {
+            countriesMap[country.code] = "red";
+        });
+
+        countriesToVisit.forEach((country) => {
+            countriesMap[country.code] = "blue";
+        });
+
+        setMap(countriesMap);
+    }, [visitedCountries, countriesToVisit]);
 
     const fetchVisitedCountries = () => {
         fetch("/api/countries/list/visited")
@@ -36,6 +54,11 @@ export default function Dashboard(props) {
     };
 
     const handleAddVisitedCountry = async () => {
+        if (!visitedCountryValue) {
+            alert("Please choose country!");
+            return;
+        }
+
         const token = document.head.querySelector('meta[name="csrf-token"]');
         const data = {
             country_id: visitedCountryValue.value,
@@ -53,21 +76,21 @@ export default function Dashboard(props) {
 
     const handleRemoveVisitedCountry = async (id) => {
         const token = document.head.querySelector('meta[name="csrf-token"]');
-        const data = {
-            id: id,
-        };
 
-        await fetch("/api/countries/visited", {
+        await fetch("/api/countries/visited/" + id, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": token.content,
             },
-            body: JSON.stringify(data),
         }).then(fetchVisitedCountries);
     };
 
     const handleAddCountryToVisit = async () => {
+        if (!countryToVisitValue) {
+            alert("Please choose country!");
+            return;
+        }
         const token = document.head.querySelector('meta[name="csrf-token"]');
         const data = {
             country_id: countryToVisitValue.value,
@@ -85,17 +108,13 @@ export default function Dashboard(props) {
 
     const handleRemoveCountryToVisit = async (id) => {
         const token = document.head.querySelector('meta[name="csrf-token"]');
-        const data = {
-            id: id,
-        };
 
-        await fetch("/api/countries/to_visit", {
+        await fetch("/api/countries/to_visit/" + id, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": token.content,
             },
-            body: JSON.stringify(data),
         }).then(fetchCountriesToVisit);
     };
 
@@ -134,7 +153,15 @@ export default function Dashboard(props) {
                 <div className="max-w-7xl sm:px-6 lg:px-8 flex-1">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
-                            Map
+                            <Datamap
+                                scope="world"
+                                responsive
+                                geographyConfig={{
+                                    popupOnHover: true,
+                                    highlightOnHover: true,
+                                }}
+                                data={map}
+                            />
                         </div>
                     </div>
                 </div>
@@ -163,16 +190,13 @@ export default function Dashboard(props) {
 
                                 <div className="border border-sky-600 rounded px-2 grid grid-cols-1 divide-sky-600 divide-y-2">
                                     {visitedCountries.map((item) => (
-                                        <div
-                                            key={item.pivot.id}
-                                            className="py-3"
-                                        >
+                                        <div key={item.id} className="py-3">
                                             <span>{item.name}</span>
                                             <button
                                                 className="float-right bg-red-600 text-white p-1 rounded"
                                                 onClick={() =>
                                                     handleRemoveVisitedCountry(
-                                                        item.pivot.id
+                                                        item.id
                                                     )
                                                 }
                                             >
@@ -205,16 +229,13 @@ export default function Dashboard(props) {
 
                                 <div className="border border-sky-600 rounded px-2 grid grid-cols-1 divide-sky-600 divide-y-2">
                                     {countriesToVisit.map((item) => (
-                                        <div
-                                            key={item.pivot.id}
-                                            className="py-3"
-                                        >
+                                        <div key={item.id} className="py-3">
                                             <span>{item.name}</span>
                                             <button
                                                 className="float-right bg-red-600 text-white p-1 rounded"
                                                 onClick={() =>
                                                     handleRemoveCountryToVisit(
-                                                        item.pivot.id
+                                                        item.id
                                                     )
                                                 }
                                             >

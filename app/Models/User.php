@@ -43,11 +43,11 @@ class User extends Authenticatable
 
     public function get_visited_countries()
     {
-        return $this->belongsToMany(Country::class, 'visited_countries', 'user_id', 'country_id')->withPivot("id");
+        return $this->belongsToMany(Country::class, 'visited_countries', 'user_id', 'country_id');
     }
 
     public function get_countries_to_visit()
     {
-        return $this->belongsToMany(Country::class, "countries_to_visit", 'user_id', 'country_id')->withPivot("id");
+        return $this->belongsToMany(Country::class, "countries_to_visit", 'user_id', 'country_id');
     }
 }

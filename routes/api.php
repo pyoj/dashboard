@@ -25,7 +25,7 @@ Route::get('/countries/list/visited', [CountriesController::class, 'get_visited_
 Route::get('/countries/list/to_visit', [CountriesController::class, 'get_countries_to_visit']);
 
 Route::post('/countries/create/visited', [CountriesController::class, 'create_visited_country']);
-Route::delete('/countries/visited', [CountriesController::class, 'delete_visited_country']);
+Route::delete('/countries/visited/{country_id}', [CountriesController::class, 'delete_visited_country']);
 
 Route::post('/countries/create/to_visit', [CountriesController::class, 'create_country_to_visit']);
-Route::delete('/countries/to_visit', [CountriesController::class, 'delete_country_to_visit']);
+Route::delete('/countries/to_visit/{country_id}', [CountriesController::class, 'delete_country_to_visit']);

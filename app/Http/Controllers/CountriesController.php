@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CountriesToVisit;
 use App\Models\Country;
-use App\Models\VisitedCountries;
 use Illuminate\Http\Request;
 
 class CountriesController extends Controller
@@ -36,17 +34,22 @@ class CountriesController extends Controller
             'country_id' => 'required',
         ]);
 
-        $user = [
-            'user_id' => $request->user()->id
-        ];
+        Country::findorFail($request->input("country_id"));
+        $request->user()->get_visited_countries()->attach($request->input("country_id"));
 
-        VisitedCountries::create($request->all() + $user);
+        $request->user()->save();
+
+        return ["success" => "Added successfully"];
     }
 
-    public function delete_visited_country(Request $request)
+    public function delete_visited_country(Request $request, $country_id)
     {
-        $country = VisitedCountries::where('id', $request->input("id"))->firstOrFail();
-        $country->delete();
+        Country::findorFail($country_id);
+        $request->user()->get_visited_countries()->detach($country_id);
+
+        $request->user()->save();
+
+        return ["success" => "Deleted successfully"];
     }
 
     public function create_country_to_visit(Request $request)
@@ -55,16 +58,21 @@ class CountriesController extends Controller
             'country_id' => 'required',
         ]);
 
-        $user = [
-            'user_id' => $request->user()->id
-        ];
+        Country::findorFail($request->input("country_id"));
+        $request->user()->get_countries_to_visit()->attach($request->input("country_id"));
 
-        CountriesToVisit::create($request->all() + $user);
+        $request->user()->save();
+
+        return ["success" => "Added successfully"];
     }
 
-    public function delete_country_to_visit(Request $request)
+    public function delete_country_to_visit(Request $request, $country_id)
     {
-        $country = CountriesToVisit::where('id', $request->input("id"))->firstOrFail();
-        $country->delete();
+        Country::findorFail($country_id);
+        $request->user()->get_countries_to_visit()->detach($country_id);
+
+        $request->user()->save();
+
+        return ["success" => "Deleted successfully"];
     }
 }
